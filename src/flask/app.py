@@ -436,11 +436,12 @@ class Flask(App):
             matching. Use :attr:`subdomain_matching` instead.
         """
         if request is not None:
-            # If subdomain matching is disabled (the default), use the
-            # default subdomain in all cases. This should be the default
-            # in Werkzeug but it currently does not have that feature.
-            if not self.subdomain_matching:
-                subdomain = self.url_map.default_subdomain or None
+            # Werkzeug's Map should implement subdomain_matching=False. Until
+            # then, disable it by forcing the current subdomain to the default
+            # subdomain. If there's no default, use the empty string, otherwise
+            # it still tries to do matching.
+            if not self.url_map.host_matching and not self.subdomain_matching:
+                subdomain = self.url_map.default_subdomain or ""
             else:
                 subdomain = None
 
